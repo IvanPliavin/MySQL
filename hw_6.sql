@@ -139,32 +139,17 @@ COUNT((SELECT gender FROM profiles WHERE profiles.user_id = likes.user_id AND ge
 
 -- 4. Подсчитать общее количество лайков десяти самым молодым пользователям (сколько лайков получили 10 самых молодых пользователей).
 
-SELECT target_id, 
-(SELECT birthday FROM profiles WHERE profiles.user_id = likes.user_id) AS birthday, 
-(SELECT first_name FROM users WHERE users.id = likes.user_id) AS name, 
-(SELECT last_name FROM users WHERE users.id = likes.user_id) AS last_name 
-FROM likes ORDER BY birthday DESC LIMIT 18;
-+-----------+------------+----------+-----------+
-| target_id | birthday   | name     | last_name |
-+-----------+------------+----------+-----------+
-|        87 | 2020-03-10 | Terry    | Dach      |
-|         5 | 2020-01-16 | Abagail  | Howe      |
-|        80 | 2019-06-12 | Forest   | O'Reilly  |
-|        85 | 2019-06-12 | Forest   | O'Reilly  |
-|        97 | 2019-06-12 | Forest   | O'Reilly  |
-|        33 | 2019-02-16 | Suzanne  | O'Connell |
-|        70 | 2017-07-23 | Darrell  | Howe      |
-|        49 | 2017-07-23 | Darrell  | Howe      |
-|         5 | 2017-02-23 | Giuseppe | Simonis   |
-|        68 | 2017-02-23 | Giuseppe | Simonis   |
-|        87 | 2017-02-23 | Giuseppe | Simonis   |
-|        78 | 2017-02-23 | Giuseppe | Simonis   |
-|        45 | 2016-05-23 | Janet    | Ziemann   |
-|        51 | 2016-05-23 | Janet    | Ziemann   |
-|        62 | 2016-05-23 | Janet    | Ziemann   |
-|        69 | 2016-02-28 | Abdul    | Brown     |
-|         7 | 2013-12-22 | Alta     | Grimes    |
-|        80 | 2013-11-07 | Tyreek   | Cummerata |
+SELECT SUM(sum_like) AS 10_young_likes FROM 
+(SELECT COUNT(target_id) AS sum_like, 
+(SELECT id FROM users WHERE likes.target_id = users.id) AS user_id, 
+(SELECT birthday FROM profiles WHERE profiles.user_id = likes.target_id) AS birthday, 
+CONCAT((SELECT first_name FROM users WHERE users.id = likes.target_id), ' ', (SELECT last_name FROM users WHERE users.id = likes.target_id)) AS full_name 
+FROM likes GROUP BY target_id ORDER BY birthday DESC LIMIT 10) AS sum_table;
++----------------+
+| 10_young_likes |
++----------------+
+|             16 |
++----------------+
 
 -- Сортируем данные от даты рождения и считаем вручную))) 18 лайков)
 
