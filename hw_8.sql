@@ -2,7 +2,7 @@
 
 SELECT COUNT(likes.id) AS total_likes, profiles.gender 
      FROM likes 
-          LEFT JOIN profiles ON likes.user_id = profiles.user_id 
+          JOIN profiles ON likes.user_id = profiles.user_id 
      GROUP BY profiles.gender 
      ORDER BY total_likes DESC;
 +-------------+--------+
