@@ -139,17 +139,45 @@ COUNT((SELECT gender FROM profiles WHERE profiles.user_id = likes.user_id AND ge
 
 -- 4. Подсчитать общее количество лайков десяти самым молодым пользователям (сколько лайков получили 10 самых молодых пользователей).
 
-SELECT SUM(sum_like) AS 10_young_likes FROM 
-(SELECT COUNT(target_id) AS sum_like, 
-(SELECT id FROM users WHERE likes.target_id = users.id) AS user_id, 
-(SELECT birthday FROM profiles WHERE profiles.user_id = likes.target_id) AS birthday, 
-CONCAT((SELECT first_name FROM users WHERE users.id = likes.target_id), ' ', (SELECT last_name FROM users WHERE users.id = likes.target_id)) AS full_name 
-FROM likes GROUP BY target_id ORDER BY birthday DESC LIMIT 10) AS sum_table;
+SELECT SUM(total_likes) AS 10_young_likes FROM 
+     (SELECT
+          (SELECT COUNT(*) FROM likes WHERE target_id = profiles.user_id AND target_type_id = 2) AS total_likes 
+          FROM profiles 
+          ORDER BY birthday 
+          DESC LIMIT 10) AS user_likes;
 +----------------+
 | 10_young_likes |
 +----------------+
-|             16 |
+|              3 |
 +----------------+
+
+-- 5. Найти 10 пользователей, которые проявляют наименьшую активность в использовании социальной сети
+-- Критерии пользователей: все записи created_at = updated_at значит не был активен с момента создания; по увеличению разрыва времени
+-- между created_at и updated_at чем выше время тем менее активен
+
+SELECT 
+     CONCAT(first_name, ' ', last_name) AS user,
+           (SELECT COUNT(*) FROM likes WHERE likes.user_id = users.id) +
+           (SELECT COUNT(*) FROM media WHERE media.user_id = users.id) +
+           (SELECT COUNT(*) FROM messages WHERE messages.from_user_id = users.id) AS activity, id
+               FROM users
+               ORDER BY activity
+               LIMIT 10;
++-------------------+----------+------+
+| user              | activity | id   |
++-------------------+----------+------+
+| Lorenzo Wehner    |        0 |   66 |
+| Lily Cummings     |        0 |   24 |
+| Eva Block         |        0 |   84 |
+| Mortimer Koch     |        0 |   30 |
+| Amira Satterfield |        0 |   16 |
+| Clemens Runte     |        1 |    1 |
+| Alta Osinski      |        1 |    6 |
+| Marta Effertz     |        1 |   12 |
+| Efrain Prohaska   |        1 |    8 |
+| Carmela Bahringer |        1 |   31 |
++-------------------+----------+------+
+
 
 -- Убираем внешний ключ на target_id в таблице likes, так как он может ссылаться на строки в разных таблицах.
                                                                                                                      
